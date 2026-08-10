@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Horn OK Please</title>
+
+<script>
+/* =========================================================
+   HORN OK PLEASE — EDITABLE SETTINGS
+   ========================================================= */
+const SITE_CONFIG = {
+
+  // Multiple background themes. Add as many as you want.
+  // Visitors can pick between them with the theme button.
+  // "backgroundImage" below is kept for backwards compatibility
+  // and is used automatically as the first theme if "themes" is empty.
+  themes: [
+    {
+      name: "Truck Art",
+      url: "https://media.discordapp.net/attachments/1364246188563497041/1536412149633777785/truck.png.png?ex=6a7b4ed1&is=6a79fd51&hm=000ffd735e49e4bb5b6fe172b907f0187e30acd33bdddab64aff020b271dbe67&=&format=webp&quality=lossless"
+    },
+    // Example of adding more themes:
+     {
+      name: "Night Highway",
+       url: "https://media.discordapp.net/attachments/1069520511111020647/1536478099200544968/ChatGPT_Image_Aug_11_2026_02_23_19_AM.png?ex=6a7b8c3d&is=6a7a3abd&hm=b64bf325f38d051072038665368ba258754f7175d54aa08663986cbc40ae2568&=&format=webp&quality=lossless&width=512&height=512"
+     }
+    // {
+    //   name: "Sunset Dhaba",
+    //   url: "PASTE_DIRECT_DISCORD_OR_CDN_IMAGE_URL_HERE"
+    // }
+  ],
+
+  // Legacy single-image field (used only if "themes" above is empty).
+  backgroundImage: "",
+
+  // 0 = no darkening | 0.12 = subtle | 0.25 = medium
+  backgroundOverlay: 0.25,
+
+  // Add as many playlists as you want.
+  // Name = what visitors see.
+  // url  = complete YouTube / YouTube Music playlist URL.
+  playlists: [
+     {
+      name: "check",
+      url: "https://music.youtube.com/playlist?list=PL_sib6mAxFrHNTJH16i-bJepABnEeHOrO&si=YaRdip6tSw8qv7pr"
+    },
+    {
+      name: "Chill",
+      url: "https://music.youtube.com/playlist?list=PL_sib6mAxFrEY_TKbPidp0rURp08j3HhA&si=AL9r5UQXeeq8JXpD"
+    }
+   
+  ],
+
+  player: {
+    accent: "#ffffff",
+    background: "rgba(12,12,15,.72)",
+    text: "#ffffff",
+    muted: "rgba(255,255,255,.62)",
+    border: "rgba(255,255,255,.14)",
+    blur: "18px",
+    opacity: 0.94,
+    width: "350px"
+  }
+};
+/* ========================================================= */
+</script>
+
+<style>
+:root{
+  --accent:#fff;
+  --player-bg:rgba(12,12,15,.72);
+  --text:#fff;
+  --muted:rgba(255,255,255,.62);
+  --border:rgba(255,255,255,.14);
+  --blur:18px;
+  --width:350px;
+  --opacity:.94
+}
+*{box-sizing:border-box}
+html,body{
+  width:100%;
+  height:100%;
+  margin:0;
+  overflow:hidden;
+  background:#050505
+}
+body{
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif
+}
+.background{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  background-position:center;
+  background-size:cover;
+  background-repeat:no-repeat;
+  background-color:#050505;
+  transition:background-image .5s ease
+}
+.background.fading{opacity:0}
+.background{
+  opacity:1;
+  transition:opacity .4s ease
+}
+.overlay{
+  position:fixed;
+  inset:0;
+  background:#000;
+  pointer-events:none
+}
+#youtube-player{
+  position:fixed;
+  width:1px;
+  height:1px;
+  left:-10px;
+  top:-10px;
+  opacity:0;
+  pointer-events:none
+}
+
+/* Theme selector */
+.theme-button{
+  position:fixed;
+  z-index:25;
+  right:18px;
+  top:18px;
+  border:1px solid var(--border);
+  border-radius:13px;
+  padding:8px 12px;
+  color:var(--text);
+  background:rgba(12,12,15,.62);
+  backdrop-filter:blur(var(--blur));
+  -webkit-backdrop-filter:blur(var(--blur));
+  box-shadow:0 10px 35px rgba(0,0,0,.25);
+  cursor:pointer;
+  font-size:11px;
+  font-weight:600;
+  white-space:nowrap
+}
+.theme-button:hover{
+  background:rgba(255,255,255,.12)
+}
+.theme-menu{
+  position:fixed;
+  z-index:40;
+  right:18px;
+  top:60px;
+  width:min(240px,calc(100vw - 30px));
+  max-height:280px;
+  overflow:auto;
+  padding:7px;
+  border:1px solid var(--border);
+  border-radius:15px;
+  background:rgba(10,10,13,.88);
+  backdrop-filter:blur(22px);
+  -webkit-backdrop-filter:blur(22px);
+  box-shadow:0 18px 55px rgba(0,0,0,.42);
+  display:none
+}
+.theme-menu.open{display:block}
+.theme-heading{
+  padding:7px 9px 8px;
+  color:var(--muted);
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:.08em
+}
+.theme-item{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:10px;
+  margin:2px 0;
+  border:0;
+  border-radius:10px;
+  color:var(--text);
+  background:transparent;
+  text-align:left;
+  cursor:pointer;
+  font-size:11px
+}
+.theme-item:hover{
+  background:rgba(255,255,255,.09)
+}
+.theme-item.active{
+  background:rgba(255,255,255,.14)
+}
+.theme-swatch{
+  width:27px;
+  height:27px;
+  border-radius:8px;
+  flex:0 0 27px;
+  background-size:cover;
+  background-position:center;
+  background-color:rgba(255,255,255,.09);
+  border:1px solid rgba(255,255,255,.14)
+}
+.theme-name{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap
+}
+
+/* Playlist selector */
+.playlist-button{
+  position:fixed;
+  z-index:25;
+  left:50%;
+  bottom:205px;
+  transform:translateX(-50%);
+  border:1px solid var(--border);
+  border-radius:13px;
+  padding:8px 12px;
+  color:var(--text);
+  background:rgba(12,12,15,.62);
+  backdrop-filter:blur(var(--blur));
+  -webkit-backdrop-filter:blur(var(--blur));
+  box-shadow:0 10px 35px rgba(0,0,0,.25);
+  cursor:pointer;
+  font-size:11px;
+  font-weight:600;
+  white-space:nowrap
+}
+.playlist-button:hover{
+  background:rgba(255,255,255,.12)
+}
+.playlist-menu{
+  position:fixed;
+  z-index:40;
+  left:50%;
+  bottom:250px;
+  transform:translateX(-50%);
+  width:min(300px,calc(100vw - 30px));
+  max-height:280px;
+  overflow:auto;
+  padding:7px;
+  border:1px solid var(--border);
+  border-radius:15px;
+  background:rgba(10,10,13,.88);
+  backdrop-filter:blur(22px);
+  -webkit-backdrop-filter:blur(22px);
+  box-shadow:0 18px 55px rgba(0,0,0,.42);
+  display:none
+}
+.playlist-menu.open{display:block}
+.playlist-heading{
+  padding:7px 9px 8px;
+  color:var(--muted);
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:.08em
+}
+.playlist-item{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:10px;
+  margin:2px 0;
+  border:0;
+  border-radius:10px;
+  color:var(--text);
+  background:transparent;
+  text-align:left;
+  cursor:pointer;
+  font-size:11px
+}
+.playlist-item:hover{
+  background:rgba(255,255,255,.09)
+}
+.playlist-item.active{
+  background:rgba(255,255,255,.14)
+}
+.playlist-icon{
+  width:27px;
+  height:27px;
+  border-radius:8px;
+  display:grid;
+  place-items:center;
+  background:rgba(255,255,255,.09);
+  flex:0 0 27px
+}
+.playlist-name{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap
+}
+
+/* Audio player */
+.audio-player{
+  position:fixed;
+  z-index:20;
+  left:50%;
+  bottom:24px;
+  transform:translateX(-50%);
+  width:min(var(--width),calc(100vw - 28px));
+  padding:11px 13px;
+  border:1px solid var(--border);
+  border-radius:18px;
+  background:var(--player-bg);
+  backdrop-filter:blur(var(--blur)) saturate(130%);
+  -webkit-backdrop-filter:blur(var(--blur)) saturate(130%);
+  box-shadow:0 12px 45px rgba(0,0,0,.30),inset 0 1px 0 rgba(255,255,255,.08);
+  color:var(--text);
+  opacity:var(--opacity)
+}
+.track-row{
+  display:flex;
+  align-items:center;
+  gap:10px
+}
+.album{
+  width:35px;
+  height:35px;
+  flex:0 0 35px;
+  border-radius:10px;
+  display:grid;
+  place-items:center;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.10);
+  font-size:14px
+}
+.track-info{
+  min-width:0;
+  flex:1
+}
+.track-title{
+  font-size:12px;
+  font-weight:700;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis
+}
+.track-status{
+  margin-top:2px;
+  font-size:10px;
+  color:var(--muted);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis
+}
+.controls{
+  display:flex;
+  align-items:center;
+  gap:4px
+}
+.btn{
+  width:29px;
+  height:29px;
+  padding:0;
+  border:0;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  color:var(--text);
+  background:transparent;
+  cursor:pointer
+}
+.btn:hover{background:rgba(255,255,255,.10)}
+.btn.main{
+  width:34px;
+  height:34px;
+  color:#111;
+  background:var(--accent);
+  font-size:12px
+}
+.progress-row{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  margin-top:8px
+}
+.time{
+  width:28px;
+  color:var(--muted);
+  font-size:9px;
+  text-align:center;
+  font-variant-numeric:tabular-nums
+}
+.progress{
+  flex:1;
+  height:3px;
+  appearance:none;
+  -webkit-appearance:none;
+  border:0;
+  border-radius:20px;
+  background:rgba(255,255,255,.18);
+  outline:none;
+  cursor:pointer
+}
+.progress::-webkit-slider-thumb{
+  appearance:none;
+  -webkit-appearance:none;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--accent)
+}
+.progress::-moz-range-thumb{
+  width:8px;
+  height:8px;
+  border:0;
+  border-radius:50%;
+  background:var(--accent)
+}
+.bottom-tools{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:3px
+}
+.volume{
+  width:72px;
+  height:2px;
+  appearance:none;
+  -webkit-appearance:none;
+  background:rgba(255,255,255,.14);
+  border-radius:10px
+}
+.volume::-webkit-slider-thumb{
+  appearance:none;
+  -webkit-appearance:none;
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--accent)
+}
+.volume::-moz-range-thumb{
+  width:7px;
+  height:7px;
+  border:0;
+  border-radius:50%;
+  background:var(--accent)
+}
+.message{
+  position:fixed;
+  z-index:50;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:min(440px,calc(100vw - 40px));
+  padding:18px 20px;
+  border-radius:16px;
+  background:rgba(0,0,0,.78);
+  color:#fff;
+  border:1px solid rgba(255,255,255,.12);
+  backdrop-filter:blur(16px);
+  text-align:center;
+  line-height:1.6;
+  font-size:13px;
+  display:none
+}
+.message.show{display:block}
+@media(max-width:480px){
+  .audio-player{
+    bottom:12px;
+    width:calc(100vw - 20px)
+  }
+  .playlist-button{bottom:193px}
+  .playlist-menu{bottom:238px}
+  .theme-button{right:12px;top:12px}
+  .theme-menu{right:12px;top:54px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="background" id="background"></div>
+<div class="overlay" id="overlay"></div>
+
+<div id="youtube-player"></div>
+
+<!-- Theme selector -->
+<button class="theme-button" id="themeButton" onclick="toggleThemeMenu()">
+  ☼ <span id="selectedThemeName">Theme</span> ▾
+</button>
+
+<div class="theme-menu" id="themeMenu">
+  <div class="theme-heading">Choose background</div>
+  <div id="themeList"></div>
+</div>
+
+<!-- Playlist selector -->
+<button class="playlist-button" id="playlistButton" onclick="togglePlaylistMenu()">
+  ♪ <span id="selectedPlaylistName">Highway Hits</span> ▾
+</button>
+
+<div class="playlist-menu" id="playlistMenu">
+  <div class="playlist-heading">Choose playlist</div>
+  <div id="playlistList"></div>
+</div>
+
+<!-- Audio player -->
+<div class="audio-player">
+
+  <div class="track-row">
+
+    <div class="album">♫</div>
+
+    <div class="track-info">
+      <div class="track-title" id="trackTitle">Horn OK Please</div>
+      <div class="track-status" id="trackStatus">Choose a playlist</div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" onclick="previousTrack()" aria-label="Previous">‹‹</button>
+      <button class="btn main" id="playButton" onclick="togglePlay()" aria-label="Play">▶</button>
+      <button class="btn" onclick="nextTrack()" aria-label="Next">››</button>
+    </div>
+
+  </div>
+
+  <div class="progress-row">
+    <span class="time" id="currentTime">0:00</span>
+
+    <input
+      class="progress"
+      id="progress"
+      type="range"
+      min="0"
+      max="100"
+      value="0"
+      step=".1"
+    >
+
+    <span class="time" id="duration">0:00</span>
+  </div>
+
+  <div class="bottom-tools">
+    <span id="playlistStatus" style="font-size:9px;color:var(--muted)">
+      HIGHWAY RADIO
+    </span>
+
+    <input
+      class="volume"
+      id="volume"
+      type="range"
+      min="0"
+      max="100"
+      value="75"
+    >
+  </div>
+
+</div>
+
+<div class="message" id="message"></div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+
+<script>
+let ytPlayer=null;
+let ytReady=false;
+let isPlaying=false;
+let timer=null;
+let currentPlaylistIndex=0;
+let currentThemeIndex=0;
+
+/* ---------- Themes / Background ---------- */
+
+function getThemeList(){
+
+  // Prefer the new "themes" array. Fall back to the legacy
+  // single "backgroundImage" field so old configs keep working.
+  if(Array.isArray(SITE_CONFIG.themes) && SITE_CONFIG.themes.length){
+    return SITE_CONFIG.themes;
+  }
+
+  const legacy=String(SITE_CONFIG.backgroundImage||"").trim();
+
+  if(legacy && legacy!=="PASTE_DISCORD_IMAGE_URL_HERE"){
+    return [{name:"Default",url:legacy}];
+  }
+
+  return [];
+
+}
+
+function buildThemeMenu(){
+
+  const themes=getThemeList();
+  const list=document.getElementById("themeList");
+  const button=document.getElementById("themeButton");
+
+  list.innerHTML="";
+
+  if(!themes.length){
+    button.style.display="none";
+    return;
+  }
+
+  button.style.display="block";
+
+  themes.forEach((theme,index)=>{
+
+    if(!theme.name || !theme.url)return;
+
+    const item=document.createElement("button");
+
+    item.className="theme-item";
+    item.innerHTML=
+      '<span class="theme-swatch"></span>'+
+      '<span class="theme-name"></span>';
+
+    item.querySelector(".theme-swatch").style.backgroundImage=
+      "url(\""+theme.url.replace(/"/g,'\\"')+"\")";
+
+    item.querySelector(".theme-name").textContent=theme.name;
+
+    item.onclick=function(){
+      selectTheme(index);
+    };
+
+    list.appendChild(item);
+
+  });
+
+  updateThemeMenuActive();
+
+}
+
+function updateThemeMenuActive(){
+
+  const items=document.querySelectorAll(".theme-item");
+
+  items.forEach((item,index)=>{
+    item.classList.toggle("active",index===currentThemeIndex);
+  });
+
+}
+
+function toggleThemeMenu(){
+
+  document.getElementById("themeMenu")
+    .classList.toggle("open");
+
+}
+
+function closeThemeMenu(){
+
+  document.getElementById("themeMenu")
+    .classList.remove("open");
+
+}
+
+function selectTheme(index){
+
+  const themes=getThemeList();
+  const theme=themes[index];
+
+  if(!theme)return;
+
+  currentThemeIndex=index;
+
+  document.getElementById("selectedThemeName").textContent=
+    theme.name;
+
+  updateThemeMenuActive();
+  closeThemeMenu();
+
+  applyBackground(theme.url);
+
+}
+
+function applyBackground(url){
+
+  url=String(url||"").trim();
+
+  if(!url)return;
+
+  const bg=document.getElementById("background");
+  const image=new Image();
+
+  image.onload=function(){
+
+    // Quick crossfade between backgrounds.
+    bg.classList.add("fading");
+
+    setTimeout(function(){
+      bg.style.backgroundImage="url(\""+url.replace(/"/g,'\\"')+"\")";
+      bg.classList.remove("fading");
+    },220);
+
+  };
+
+  image.onerror=function(){
+    showMessage(
+      "<b>Background image could not be loaded.</b><br><br>"+
+      "Check that your Discord link is a direct CDN/media link."
+    );
+  };
+
+  image.src=url;
+
+}
+
+function loadBackground(){
+
+  const themes=getThemeList();
+
+  if(!themes.length)return;
+
+  currentThemeIndex=0;
+
+  document.getElementById("selectedThemeName").textContent=
+    themes[0].name;
+
+  applyBackground(themes[0].url);
+
+}
+
+/* ---------- Playlists ---------- */
+
+function getPlaylistId(url){
+
+  try{
+    return new URL(url).searchParams.get("list")||"";
+  }catch(e){
+    return "";
+  }
+
+}
+
+function buildPlaylistMenu(){
+
+  const list=document.getElementById("playlistList");
+  list.innerHTML="";
+
+  SITE_CONFIG.playlists.forEach((playlist,index)=>{
+
+    if(!playlist.name || !playlist.url)return;
+
+    const button=document.createElement("button");
+
+    button.className="playlist-item";
+    button.innerHTML=
+      '<span class="playlist-icon">♫</span>'+
+      '<span class="playlist-name"></span>';
+
+    button.querySelector(".playlist-name").textContent=playlist.name;
+
+    button.onclick=function(){
+      selectPlaylist(index);
+    };
+
+    list.appendChild(button);
+
+  });
+
+  updatePlaylistMenuActive();
+
+}
+
+function updatePlaylistMenuActive(){
+
+  const items=document.querySelectorAll(".playlist-item");
+
+  items.forEach((item,index)=>{
+    item.classList.toggle("active",index===currentPlaylistIndex);
+  });
+
+}
+
+function togglePlaylistMenu(){
+
+  document.getElementById("playlistMenu")
+    .classList.toggle("open");
+
+}
+
+function closePlaylistMenu(){
+
+  document.getElementById("playlistMenu")
+    .classList.remove("open");
+
+}
+
+function selectPlaylist(index){
+
+  const playlist=SITE_CONFIG.playlists[index];
+
+  if(!playlist)return;
+
+  const id=getPlaylistId(playlist.url);
+
+  if(!id){
+
+    showMessage(
+      "<b>Invalid playlist URL</b><br><br>"+
+      "Check the playlist URL in SITE_CONFIG."
+    );
+
+    return;
+  }
+
+  currentPlaylistIndex=index;
+
+  document.getElementById("selectedPlaylistName").textContent=
+    playlist.name;
+
+  document.getElementById("playlistStatus").textContent=
+    playlist.name;
+
+  updatePlaylistMenuActive();
+  closePlaylistMenu();
+  hideMessage();
+
+  if(ytReady){
+
+    isPlaying=false;
+    document.getElementById("playButton").textContent="▶";
+    document.getElementById("trackTitle").textContent=playlist.name;
+    document.getElementById("trackStatus").textContent="Loading playlist…";
+
+    // Load the selected playlist without creating another iframe.
+    ytPlayer.loadPlaylist({
+      listType:"playlist",
+      list:id,
+      index:0,
+      startSeconds:0
+    });
+
+  }
+
+}
+
+/* ---------- Config ---------- */
+
+function applyConfig(){
+
+  const c=SITE_CONFIG;
+  const p=c.player||{};
+  const root=document.documentElement;
+
+  document.getElementById("overlay").style.opacity=
+    Math.max(0,Math.min(1,Number(c.backgroundOverlay??0)));
+
+  root.style.setProperty("--accent",p.accent||"#fff");
+  root.style.setProperty("--player-bg",p.background||"rgba(12,12,15,.72)");
+  root.style.setProperty("--text",p.text||"#fff");
+  root.style.setProperty("--muted",p.muted||"rgba(255,255,255,.62)");
+  root.style.setProperty("--border",p.border||"rgba(255,255,255,.14)");
+  root.style.setProperty("--blur",p.blur||"18px");
+  root.style.setProperty("--width",p.width||"350px");
+  root.style.setProperty("--opacity",p.opacity??.94);
+
+  loadBackground();
+  buildThemeMenu();
+  buildPlaylistMenu();
+
+}
+
+/* ---------- YouTube ---------- */
+
+function showMessage(text){
+
+  document.getElementById("message").innerHTML=text;
+  document.getElementById("message").classList.add("show");
+
+}
+
+function hideMessage(){
+
+  document.getElementById("message").classList.remove("show");
+
+}
+
+function formatTime(seconds){
+
+  seconds=Math.max(0,Math.floor(seconds||0));
+
+  return Math.floor(seconds/60)+":"+
+    String(seconds%60).padStart(2,"0");
+
+}
+
+function onYouTubeIframeAPIReady(){
+
+  if(!SITE_CONFIG.playlists.length){
+
+    showMessage("Add at least one playlist in SITE_CONFIG.");
+
+    return;
+  }
+
+  const firstId=getPlaylistId(
+    SITE_CONFIG.playlists[0].url
+  );
+
+  if(!firstId){
+
+    showMessage(
+      "<b>Invalid first playlist</b><br><br>"+
+      "Add a valid YouTube playlist URL."
+    );
+
+    return;
+  }
+
+  ytPlayer=new YT.Player("youtube-player",{
+
+    width:"1",
+    height:"1",
+
+    playerVars:{
+      listType:"playlist",
+      list:firstId,
+      playsinline:1,
+      rel:0,
+      modestbranding:1,
+      controls:0,
+      disablekb:1,
+      fs:0,
+      iv_load_policy:3,
+      enablejsapi:1,
+      origin:location.origin
+    },
+
+    events:{
+      onReady:onPlayerReady,
+      onStateChange:onPlayerStateChange,
+      onError:onPlayerError
+    }
+
+  });
+
+}
+
+function onPlayerReady(){
+
+  ytReady=true;
+
+  ytPlayer.setVolume(
+    Number(document.getElementById("volume").value)
+  );
+
+  const first=SITE_CONFIG.playlists[0];
+
+  if(first){
+
+    document.getElementById("selectedPlaylistName").textContent=
+      first.name;
+
+    document.getElementById("playlistStatus").textContent=
+      first.name;
+
+  }
+
+  document.getElementById("trackStatus").textContent=
+    "Playlist ready • press play";
+
+  startProgressTimer();
+
+}
+
+function onPlayerStateChange(event){
+
+  if(!ytReady)return;
+
+  if(event.data===YT.PlayerState.PLAYING){
+
+    isPlaying=true;
+
+    document.getElementById("playButton").textContent="Ⅱ";
+
+    updateTrackTitle();
+
+  }
+
+  else if(event.data===YT.PlayerState.PAUSED){
+
+    isPlaying=false;
+
+    document.getElementById("playButton").textContent="▶";
+
+    document.getElementById("trackStatus").textContent="Paused";
+
+  }
+
+  else if(event.data===YT.PlayerState.BUFFERING){
+
+    document.getElementById("trackStatus").textContent="Loading…";
+
+  }
+
+}
+
+function onPlayerError(event){
+
+  if(event.data===153){
+
+    showMessage(
+      "<b>YouTube Error 153</b><br><br>"+
+      "Run this website through <b>http://localhost</b> or HTTPS."
+    );
+
+  }
+
+  else if(event.data===150||event.data===101){
+
+    showMessage(
+      "<b>This YouTube video cannot be embedded.</b><br><br>"+
+      "YouTube has disabled embedding for this video."
+    );
+
+  }
+
+  else{
+
+    showMessage(
+      "<b>YouTube playback error "+event.data+"</b>"
+    );
+
+  }
+
+}
+
+/* ---------- Controls ---------- */
+
+function togglePlay(){
+
+  if(!ytReady)return;
+
+  hideMessage();
+
+  if(isPlaying)
+    ytPlayer.pauseVideo();
+  else
+    ytPlayer.playVideo();
+
+}
+
+function nextTrack(){
+
+  if(!ytReady)return;
+
+  ytPlayer.nextVideo();
+  setTimeout(updateTrackTitle,500);
+
+}
+
+function previousTrack(){
+
+  if(!ytReady)return;
+
+  ytPlayer.previousVideo();
+  setTimeout(updateTrackTitle,500);
+
+}
+
+function updateTrackTitle(){
+
+  if(!ytReady)return;
+
+  try{
+
+    const data=ytPlayer.getVideoData();
+
+    if(data&&data.title){
+
+      document.getElementById("trackTitle").textContent=
+        data.title;
+
+      document.getElementById("trackStatus").textContent=
+        isPlaying ? "Now playing" : "Ready";
+
+    }
+
+  }catch(e){}
+
+}
+
+function startProgressTimer(){
+
+  clearInterval(timer);
+
+  timer=setInterval(()=>{
+
+    if(!ytReady)return;
+
+    try{
+
+      const duration=ytPlayer.getDuration();
+      const current=ytPlayer.getCurrentTime();
+
+      if(duration>0){
+
+        document.getElementById("progress").value=
+          current/duration*100;
+
+        document.getElementById("currentTime").textContent=
+          formatTime(current);
+
+        document.getElementById("duration").textContent=
+          formatTime(duration);
+
+      }
+
+    }catch(e){}
+
+  },500);
+
+}
+
+document.getElementById("progress").addEventListener(
+  "input",
+  function(){
+
+    if(!ytReady)return;
+
+    const duration=ytPlayer.getDuration();
+
+    if(duration>0){
+
+      ytPlayer.seekTo(
+        duration*Number(this.value)/100,
+        true
+      );
+
+    }
+
+  }
+);
+
+document.getElementById("volume").addEventListener(
+  "input",
+  function(){
+
+    if(ytReady)
+      ytPlayer.setVolume(Number(this.value));
+
+  }
+);
+
+document.addEventListener("click",function(event){
+
+  const playlistMenu=document.getElementById("playlistMenu");
+  const playlistButton=document.getElementById("playlistButton");
+
+  if(
+    playlistMenu.classList.contains("open") &&
+    !playlistMenu.contains(event.target) &&
+    !playlistButton.contains(event.target)
+  ){
+    closePlaylistMenu();
+  }
+
+  const themeMenu=document.getElementById("themeMenu");
+  const themeButton=document.getElementById("themeButton");
+
+  if(
+    themeMenu.classList.contains("open") &&
+    !themeMenu.contains(event.target) &&
+    !themeButton.contains(event.target)
+  ){
+    closeThemeMenu();
+  }
+
+});
+
+document.addEventListener("keydown",function(event){
+
+  if(event.code==="Space"&&event.target.tagName!=="INPUT"){
+
+    event.preventDefault();
+    togglePlay();
+
+  }
+
+  if(event.code==="ArrowRight"&&event.target.tagName!=="INPUT")
+    nextTrack();
+
+  if(event.code==="ArrowLeft"&&event.target.tagName!=="INPUT")
+    previousTrack();
+
+  if(event.code==="Escape"){
+    closePlaylistMenu();
+    closeThemeMenu();
+  }
+
+});
+
+applyConfig();
+</script>
+
+</body>
+</html>
